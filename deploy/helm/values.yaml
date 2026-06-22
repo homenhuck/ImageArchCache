@@ -1,8 +1,8 @@
 replicaCount: 2
 
 image:
-  repository: your-ecr-account.dkr.ecr.us-east-1.amazonaws.com/image-arch-webhook
-  tag: "latest"
+  repository: 752575507917.dkr.ecr.us-east-1.amazonaws.com/image-arch-webhook
+  tag: "v1.0.0"
   pullPolicy: IfNotPresent
 
 namespace: image-arch-system

@@ -1,5 +1,5 @@
-IMAGE_REPO ?= your-ecr-account.dkr.ecr.us-east-1.amazonaws.com/image-arch-webhook
-IMAGE_TAG ?= latest
+IMAGE_REPO ?= 752575507917.dkr.ecr.us-east-1.amazonaws.com/image-arch-webhook
+IMAGE_TAG ?= v1.0.0
 NAMESPACE ?= image-arch-system
 KIND_CLUSTER ?= arch-webhook-e2e
 
