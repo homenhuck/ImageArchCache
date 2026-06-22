@@ -1,0 +1,40 @@
+replicaCount: 2
+
+image:
+  repository: your-ecr-account.dkr.ecr.us-east-1.amazonaws.com/image-arch-webhook
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+namespace: image-arch-system
+
+webhook:
+  port: 8443
+  failurePolicy: Ignore       # Don't block pods if webhook is down
+  timeoutSeconds: 5
+  namespaceSelector:
+    matchExpressions:
+    - key: arch-injection
+      operator: NotIn
+      values: ["disabled"]
+
+cache:
+  ttl: "24h"
+  configMapName: image-arch-cache
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+serviceAccount:
+  create: true
+  name: image-arch-webhook
+  # For ECR access, add IRSA annotation:
+  # annotations:
+  #   eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/image-arch-webhook-ecr
+
+certManager:
+  enabled: true   # Use cert-manager for TLS cert generation

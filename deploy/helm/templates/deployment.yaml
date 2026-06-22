@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-arch-webhook
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: image-arch-webhook
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: image-arch-webhook
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: image-arch-webhook
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+      - name: webhook
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - --port={{ .Values.webhook.port }}
+        - --cache-ttl={{ .Values.cache.ttl }}
+        - --cache-namespace={{ .Values.namespace }}
+        - --cache-configmap={{ .Values.cache.configMapName }}
+        - --tls-cert=/etc/webhook/certs/tls.crt
+        - --tls-key=/etc/webhook/certs/tls.key
+        ports:
+        - name: https
+          containerPort: {{ .Values.webhook.port }}
+          protocol: TCP
+        - name: health
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: health
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: health
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+        - name: certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+      volumes:
+      - name: certs
+        secret:
+          secretName: image-arch-webhook-tls
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: image-arch-webhook

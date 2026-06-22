@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: image-arch-webhook
+    # Exempt this namespace from arch injection (avoid chicken-and-egg)
+    arch-injection: disabled
